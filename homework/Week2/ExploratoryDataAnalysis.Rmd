@@ -1,0 +1,129 @@
+---
+title: "Exploratory Data Anaylsis for Data Science Capstone Project"
+author: "Recktenwald"
+date: "03/02/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading Packages and Data
+
+```{r}
+library(tidyverse)
+```
+Since the datasets are relatively big and I only have access to a not-super-strong laptop, I allow myself to only use a sample of the data for this homework report. The final model will of course be trained on the whole dataset.
+
+
+```{r}
+set.seed(123)
+## Twitter data
+twitter_con <- file("../../data/en_US/radical_twitter.txt", "r")
+twitter <- readLines(twitter_con, encoding = "UTF-8")
+close(twitter_con)
+
+twitter_sample <- sample(twitter, 30000)
+
+
+## News data
+news_con <- file("../../data/en_US/radical_news.txt", "r")
+news <- readLines(news_con, encoding = "UTF-8")
+close(news_con)
+
+news_sample <- sample(news, 30000)
+
+
+## Blog data
+blog_con <- file("../../data/en_US/radical_blogs.txt", "r")
+blog <- readLines(blog_con, encoding = "UTF-8")
+close(blog_con)
+
+blog_sample <- sample(blog, 30000)
+
+all_sample <- c(twitter_sample,news_sample,blog_sample)
+```
+
+We have the following line counts
+```{r}
+print(paste0('Twitter:', length(twitter)))
+print(paste0('News:', length(news)))
+print(paste0('Blog:', length(blog)))
+```
+Next we clean the data. We want a list, where each entry is a vector of the words of one of the samples.
+
+```{r}
+clean_corpus <- function(corp) {
+    corp <- corp %>%
+        strsplit(split = "\\s+")  %>% # split at any whitespace
+        unlist %>% # give me one huge vector instead of a list 
+        tolower %>% 
+        gsub(pattern = "[0-9\\.\\!\\?\\+#\"\':\`~\\*-_&\\(\\)\\$%]", replacement = "") # this should get rid of puncutation
+
+    corp[corp != ""] # remove empty strings
+}
+
+corpus <- lapply(all_sample,clean_corpus)
+```
+
+# Exploratory Data Analysis
+How many unique words appear in our sample?
+```{r}
+corpus %>% unlist %>% unique %>% length
+```
+Let's look at the 10 most common words
+```{r}
+word_count  <-  as.data.frame(table(unlist(corpus)),stringsAsFactors = FALSE) %>%
+    arrange(desc(Freq))
+word_count[1:10,]
+```
+How long is the average word?
+```{r}
+word_count <- word_count %>% mutate(len = nchar(Var1))
+sum(word_count$Freq * word_count$len)/sum(word_count$Freq)
+```
+Next let's look at a graph of the 25 most common words.
+```{r}
+n <- 25
+common_words <-  word_count[1:n,]
+common_words$Var1 = factor(common_words$Var1,levels = common_words$Var1)
+p <- ggplot(common_words,aes(Var1, Freq)) + geom_bar(stat="identity") + xlab("Word")
+p
+```
+Finally let's look at the $n$-grams. Here we show the example case of $n=2$.
+```{r}
+bigram_builder <- function(values){
+    n <- length(values)
+    if (n==0){
+        return(c())
+    }
+    result <- c()
+    for (k in 1:(n-1)){
+        result = c(result,paste(values[k],values[k+1],sep=" "))
+    }
+    return(result)
+}
+bigrams <- lapply(corpus,bigram_builder) %>% unlist
+```
+
+Again we can check how many unique bigrams there are
+```{r}
+bigrams %>% unique %>% length
+```
+```{r}
+bigram_count  <-  as.data.frame(table(bigrams)) %>%
+    arrange(desc(Freq))
+bigram_count[1:10,]
+```
+```{r}
+n <- 25
+common_bigrams <- bigram_count[1:n,]
+common_bigrams$bigrams <- factor(common_bigrams$bigrams,levels=common_bigrams$bigrams)
+p <- ggplot(common_bigrams,aes(bigrams,Freq)) + geom_bar(stat="identity") + xlab("Bigram")
+p
+```
+
+
+
+
