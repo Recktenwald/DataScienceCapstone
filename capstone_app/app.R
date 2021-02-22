@@ -7,11 +7,11 @@
 #    http://shiny.rstudio.com/
 #
 
-suppressWarnings(library(shiny))
-suppressWarnings(library(dplyr))
-bg <- readRDS("model_components/bigrams.Rds")
-tg <- readRDS("model_components/trigrams.Rds")
-qg <- readRDS("model_components/quadgrams.Rds")
+library(shiny)
+library(dplyr)
+bg <- readRDS("model_components/bg_short.Rds")
+tg <- readRDS("model_components/tg_short.Rds")
+qg <- readRDS("model_components/qg_short.Rds")
 
 clean_line <- function(line){ 
     # This is the function I used to preprocess the corpus
@@ -34,7 +34,7 @@ last_n <- function(words, n=3){
 predict_word <- function(sentence,maxn=3){
     words <- last_n(sentence,n=maxn)
     N <- length(words)
-    print(N)
+    # print(N)
     if (N == 3){ # Look if we find a quadgram
         canidates <- qg %>% filter(First == words[1],Second == words[2],Third == words[3])
         if (nrow(canidates) == 0){

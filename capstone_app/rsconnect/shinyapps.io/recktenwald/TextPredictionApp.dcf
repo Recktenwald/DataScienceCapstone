@@ -1,0 +1,12 @@
+name: TextPredictionApp
+title: TextPredictionApp
+username:
+account: recktenwald
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3676837
+bundleId: 4256450
+url: https://recktenwald.shinyapps.io/TextPredictionApp/
+when: 1613996305.73902
+asMultiple: FALSE
+asStatic: FALSE

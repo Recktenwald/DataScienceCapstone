@@ -81,3 +81,21 @@ saveRDS(quadgrams_third_and_fourth_quarter_unlisted,"data/quadgrams_third_and_fo
 
 q2freqs <- as.data.frame(table(q2freqs)) %>% filter(Freq>2) %>% arrange(desc(Freq))
 saveRDS(q2freqs,"data/q2freqs.Rds")
+
+
+# It turns out, that shiny restricts memory, so I cannot load all the data in. 
+# My solution is to keep only the most frequent nGram starting with a given word.
+bigrams <- bg %>% arrange(First,desc(Freq))
+bigrams_shortened <- bigrams[!duplicated(bigrams$First),]
+bg_short <- bigrams_shortened %>% arrange(desc(Freq))
+saveRDS(bg_short,"data/model_components/bg_short.Rds")
+
+trigrams <- tg %>% arrange(First,desc(Freq))
+trigrams_shortened <- trigrams[!duplicated(trigrams$First),]
+tg_short <- trigrams_shortened %>% arrange(desc(Freq))
+saveRDS(tg_short,"data/model_components/tg_short.Rds")
+
+quadgrams <- qg %>% arrange(First, desc(Freq))
+quadgrams_shortened <- quadgrams[!duplicated(quadgrams$First),]
+qg_short <- quadgrams_shortened %>% arrange(desc(Freq))
+saveRDS(qg_short,"data/model_components/qg_short.Rds")
